@@ -38,8 +38,8 @@ class Location(Nameble):
             out_ += f'{np.round(self._possible_enemies_ratio[one_i]*100, 1)}%\n'
         out_ += '\n'
         out_ += 'Плюшки:\n'
-        for one_i in range(len(self._possible_enemies)):
+        for one_i in range(len(self._possible_greeds_ratio)):
             out_ += f'Имя: {self._possible_greeds[one_i]} с шансом '
             out_ += f'{np.round(self._possible_greeds_ratio[one_i]*100, 1)}%\n'
-        out_ = out_[:-2]
+        out_ = out_[:-1]
         return out_
