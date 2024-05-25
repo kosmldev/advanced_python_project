@@ -34,5 +34,5 @@ class Greed(Earnable, Nameble):
         out_ = ''
         out_ += f'Имя: {self._name}\n'
         out_ += f'Что повышает: {PROFIT_TYPE_DICT.get(self._profit_type)}\n'
-        out_ += f'Насколько повышает: {self._profit_type}'
+        out_ += f'Насколько повышает: {self._profit}'
         return out_
