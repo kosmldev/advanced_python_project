@@ -18,7 +18,7 @@ values
 
 
 create table if not exists dbo.states (
-    id int2 not null,
+    id int2 not null constraint states_pkey primary key,
     descr text not null,
     start_dttm timestamp not null,
     end_dttm timestamp not null
@@ -33,7 +33,7 @@ values
     (4::int2, 'Нужно забрать или отказаться от награды', '2000-01-01'::timestamp, '2050-01-01'::timestamp);
 
 create table if not exists dbo.commands (
-    id text not null,
+    id text not null constraint commands_pkey primary key,
     descr text not null,
     start_dttm timestamp not null,
     end_dttm timestamp not null
@@ -65,7 +65,8 @@ create table if not exists dbo.satt_commands__attributes(
     attribute text not null,
     descr text not null,
     valid_from timestamp not null,
-    valid_to timestamp not null
+    valid_to timestamp not null,
+    constraint satt_commands__attributes__commands_fkey foreign key (id) REFERENCES dbo.commands(id)
 );
 
 insert into dbo.satt_commands__attributes (id, attribute, descr, valid_from, valid_to)
@@ -86,7 +87,7 @@ values
 
 
 create table if not exists dbo.users (
-    id text not null,
+    id text not null  constraint users_pkey primary key,
     start_dttm timestamp not null,
     end_dttm timestamp null
 );
@@ -95,14 +96,16 @@ create table if not exists dbo.satt_users__name (
     user_id text not null,
     name text not null,
     valid_from timestamp not null,
-    valid_to timestamp not null
+    valid_to timestamp not null,
+    constraint satt_users__name__users_fkey foreign key (user_id) REFERENCES dbo.users(id)
 );
 
 create table if not exists dbo.satt_users__password (
     user_id text not null,
     password text not null,
     valid_from timestamp not null,
-    valid_to timestamp not null
+    valid_to timestamp not null,
+    constraint satt_users__password__users_fkey foreign key (user_id) REFERENCES dbo.users(id)
 );
 
 create table if not exists dbo.satt_users__base_stats (
@@ -110,7 +113,8 @@ create table if not exists dbo.satt_users__base_stats (
     hp int4 not null,
     mana int4 not null,
     dttm_created timestamp not null,
-    dttm_updated timestamp not null
+    dttm_updated timestamp not null,
+    constraint satt_users__base_stats__users_fkey foreign key (user_id) REFERENCES dbo.users(id)
 );
 
 create table if not exists dbo.satt_users__attck (
@@ -118,7 +122,8 @@ create table if not exists dbo.satt_users__attck (
     l_atck int4 not null,
     u_atck int4 not null,
     dttm_created timestamp not null,
-    dttm_updated timestamp not null
+    dttm_updated timestamp not null,
+    constraint satt_users__attck__users_fkey foreign key (user_id) REFERENCES dbo.users(id)
 );
 
 create table if not exists dbo.satt_users__adv_stats (
@@ -126,18 +131,20 @@ create table if not exists dbo.satt_users__adv_stats (
     balance int4 not null,
     experiance int4 not null,
     dttm_created timestamp not null,
-    dttm_updated timestamp not null
+    dttm_updated timestamp not null,
+    constraint satt_users__adv_stats__users_fkey foreign key (user_id) REFERENCES dbo.users(id)
 );
 
 create table if not exists dbo.satt_users__current_state (
     user_id text not null,
     state int2 not null,
     dttm_created timestamp not null,
-    dttm_updated timestamp not null    
+    dttm_updated timestamp not null,
+    constraint satt_users__current_state__users_fkey foreign key (user_id) REFERENCES dbo.users(id)    
 );
 
 create table if not exists dbo.base_enemies (
-    id text not null,
+    id text not null constraint base_enemies_pkey primary key,
     name text not null,
     hp int4 not null,
     l_atck int4 not null,
@@ -153,15 +160,8 @@ values
     ('b0c7792a583d1cf39737956766ca46c2', 'Студент ФФ', 80, 25, 35, '2000-01-01'::timestamp, '2050-01-01'::timestamp),
     ('3ba01956e2bde70050320757a7d1800d', 'Студент ГГФ', 55, 0, 200, '2000-01-01'::timestamp, '2050-01-01'::timestamp);
 
-create table if not exists dbo.link_enemies__base_enemies (
-    base_id text not null,
-    enemy_id text not null,
-    dttm timestamp not null,
-    is_actual boolean not null
-);
-
 create table if not exists dbo.enemies (
-    id text not null,
+    id text not null constraint enemies_pkey primary key,
     dttm_created timestamp not null,
     dttm_updated timestamp not null,
     hp int4 not null,
@@ -170,15 +170,26 @@ create table if not exists dbo.enemies (
     is_dead boolean not null
 );
 
+create table if not exists dbo.link_enemies__base_enemies (
+    base_id text not null,
+    enemy_id text not null,
+    dttm timestamp not null,
+    is_actual boolean not null,
+    constraint link_enemies__base_enemies__base_enemies_fkey foreign key (base_id) REFERENCES dbo.base_enemies(id),
+    constraint link_enemies__base_enemies__enemies_fkey foreign key (enemy_id) REFERENCES dbo.enemies(id)
+);
+
 create table if not exists dbo.link_enemies__users (
     enemy_id text not null,
     user_id text not null,
     dttm timestamp not null,
-    is_actual boolean not null
+    is_actual boolean not null,
+    constraint link_enemies__users__enemies_fkey foreign key (enemy_id) REFERENCES dbo.enemies(id),
+    constraint link_enemies__users__users_fkey foreign key (user_id) REFERENCES dbo.users(id)
 );
 
 create table if not exists dbo.locations (
-    id text not null,
+    id text not null constraint location_pkey primary key,
     name text not null,
     start_dttm timestamp not null,
     end_dttm timestamp not null
@@ -188,7 +199,9 @@ create table if not exists dbo.link_users__locations (
     loc_id text not null,
     user_id text not null,
     dttm timestamp not null,
-    is_actual boolean not null
+    is_actual boolean not null,
+    constraint link_users__locations__locations_fkey foreign key (loc_id) REFERENCES dbo.locations(id),
+    constraint link_users__locations__users_fkey foreign key (user_id) REFERENCES dbo.users(id)
 );
 
 create table if not exists dbo.link_locations__base_enemies (
@@ -196,7 +209,9 @@ create table if not exists dbo.link_locations__base_enemies (
     base_id text not null,
     dttm timestamp not null,
     chance_ratio float not null,
-    is_actual boolean not null
+    is_actual boolean not null,
+    constraint link_locations__base_enemies__locations_fkey foreign key (loc_id) REFERENCES dbo.locations(id),
+    constraint link_locations__base_enemies__base_enemies_fkey foreign key (base_id) REFERENCES dbo.base_enemies(id)
 );
 
 insert into dbo.locations (id, name, start_dttm, end_dttm)
@@ -216,7 +231,7 @@ values
     ('07c79fbfdcd18aaddb1287aa0ee30c6d','3ba01956e2bde70050320757a7d1800d','2000-01-01'::timestamp, 0.25, 1::boolean);
 
 create table if not exists dbo.base_greeds (
-    id text not null,
+    id text not null constraint base_greeds_pkey primary key,
     name text not null,
     update_identifier text not null,
     value int2 not null,
@@ -233,7 +248,7 @@ values
     ('46e4a886177589186a2a0d5af290ccf2', 'Билеты к экзамену', 'experiance', 30::int2, '2000-01-01'::timestamp, '2050-01-01'::timestamp);
 
 create table if not exists dbo.greeds (
-    id text not null,
+    id text not null constraint greeds_pkey primary key,
     dttm_created timestamp not null,
     dttm_updated timestamp not null,
     update_identifier text not null,
@@ -244,7 +259,9 @@ create table if not exists dbo.link_greeds__base_greeds (
     base_id text not null,
     greed_id text not null,
     dttm timestamp not null,
-    is_actual boolean not null
+    is_actual boolean not null,
+    constraint link_greeds__base_greeds__base_greeds_fkey foreign key (base_id) REFERENCES dbo.base_greeds(id),
+    constraint link_greeds__base_greeds__greeds_fkey foreign key (greed_id) REFERENCES dbo.greeds(id)
 );
 
 create table if not exists dbo.link_locations__base_greeds (
@@ -252,7 +269,9 @@ create table if not exists dbo.link_locations__base_greeds (
     base_id text not null,
     dttm timestamp not null,
     chance_ratio float not null,
-    is_actual boolean not null
+    is_actual boolean not null,
+    constraint link_locations__base_greeds__locations_fkey foreign key (loc_id) REFERENCES dbo.locations(id),
+    constraint link_locations__base_greeds__base_greeds_fkey foreign key (base_id) REFERENCES dbo.base_greeds(id)
 );
 
 
@@ -274,6 +293,8 @@ create table if not exists dbo.link_greeds__users (
     greed_id text not null,
     user_id text not null,
     dttm timestamp not null,
-    is_actual boolean not null
+    is_actual boolean not null,
+    constraint link_greeds__users__greeds_fkey foreign key (greed_id) REFERENCES dbo.greeds(id),
+    constraint link_greeds__users__users_fkey foreign key (user_id) REFERENCES dbo.users(id)
 );
 
